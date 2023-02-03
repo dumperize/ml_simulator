@@ -1,0 +1,6 @@
+SELECT 
+    date_trunc('month', buy_date::date) as month,
+    AVG(check_amount) as avg_check,
+    quantilesExactExclusive(0.5)(check_amount)[1] as median_check
+FROM view_checks
+GROUP BY date_trunc('month', buy_date::date)

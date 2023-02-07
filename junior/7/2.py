@@ -1,6 +1,5 @@
 from typing import List, Tuple
 
-import numpy as np
 import math
 
 
@@ -26,7 +25,7 @@ def discounted_cumulative_gain(relevance: List[float], k: int, method: str = "st
     """
     relevance = relevance[:k]
 
-    def standart(value: Tuple[int, float]):
+    def standard(value: Tuple[int, float]):
         position, x = value
         return x / math.log(position+2, 2)
 
@@ -35,14 +34,8 @@ def discounted_cumulative_gain(relevance: List[float], k: int, method: str = "st
         return (2**x - 1) / math.log(position+2, 2)
 
     if method == 'standard':
-        return sum(map(standart, enumerate(relevance)))
+        return sum(map(standard, enumerate(relevance)))
     if method == 'industry':
         return sum(map(industry, enumerate(relevance)))
 
     raise ValueError
-
-
-# relevance = [0.99, 0.94, 0.88, 0.74, 0.71, 0.68]
-# k = 5
-# method = 'standard'
-# print(discounted_cumulative_gain(relevance, k, method))

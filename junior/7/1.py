@@ -1,7 +1,5 @@
 from typing import List
 
-import numpy as np
-
 
 def cumulative_gain(relevance: List[float], k: int) -> float:
     """Score is cumulative gain at k (CG@k)

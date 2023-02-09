@@ -72,7 +72,7 @@ class ClicksDict:
         ucbs = []
         print([x.offer_id for x in self.clicks.values()])
         for offer_id in offers_ids:
-            epsilon = 1
+            epsilon = 0.5
             offer_clicks = self.get_clicks_by_offer_id(offer_id)
             if len(offer_clicks) == 0:
                 ucbs.append({'offer_id': offer_id, 'ucb': 9999999})

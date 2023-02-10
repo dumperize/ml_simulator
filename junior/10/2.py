@@ -32,8 +32,3 @@ def t_test(cpc_a: np.ndarray, cpc_b: np.ndarray, alpha=0.05
     """
     ttest = stats.ttest_ind(cpc_a, cpc_b)
     return (bool(ttest.pvalue < alpha), float(ttest.pvalue))
-
-# cpv1 = cpc_sample(10000, 0.3, 4,2)
-# cpv2 = cpc_sample(10000, 0.3, 4,2)
-# t = t_test(cpv1, cpv2)
-# print(t)

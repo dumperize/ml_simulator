@@ -70,7 +70,6 @@ class ClicksDict:
     def get_optim_offer(self, offers_ids: [int]):
         """Get optima of offers"""
         ucbs = []
-        print([x.offer_id for x in self.clicks.values()])
         for offer_id in offers_ids:
             epsilon = 0.5
             offer_clicks = self.get_clicks_by_offer_id(offer_id)

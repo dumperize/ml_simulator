@@ -8,6 +8,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import RepeatedKFold
 from sklearn.metrics import r2_score
 from tqdm import tqdm
+from scipy import stats
 
 
 class SequentialForwardSelector:
@@ -27,6 +28,9 @@ class SequentialForwardSelector:
     verbose: int :
         (Default value = 0)
         verbosity level
+    alpha: float :
+        (Default value = 0.05)
+        significance level for t-test
 
     Attributes
     ----------
@@ -44,12 +48,14 @@ class SequentialForwardSelector:
         cv,
         max_features: int = 10,
         verbose: int = 0,
+        alpha: float = 0.05,
     ) -> None:
         """Initialize SequentialForwardSelector."""
         self.model = model
         self.cv = cv
         self.max_features = max_features
         self.verbose = verbose
+        self.alpha = alpha
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> None:
         """
@@ -65,9 +71,20 @@ class SequentialForwardSelector:
         self.features_ = range(X.shape[1])
 
         includes = set()
-        excludes = set(x for x in self.features_)
-        while len(includes) < self.max_features:
+        excludes = set(self.features_)
+
+        for i in range(self.max_features):
             scores_dict = {}
+            X_selected = X[:, [1]] if len(
+                includes) == 0 else X[:, list(includes)]
+            score_base = cross_val_score(
+                self.model,
+                X_selected,
+                y,
+                scoring="r2",
+                cv=self.cv,
+                n_jobs=-1)
+
             for k in tqdm(excludes, disable=self.verbose == 0):
                 rows = includes.copy()
                 rows.add(k)
@@ -76,10 +93,16 @@ class SequentialForwardSelector:
                 scores = cross_val_score(
                     self.model, X_selected, y, scoring="r2", cv=self.cv, n_jobs=-1)
 
-                scores_dict[k] = scores.mean()
-            max_el = max(scores_dict, key=scores_dict.get)
-            includes.add(max_el)
-            excludes.remove(max_el)
+                ttest = stats.ttest_rel(score_base, scores, alternative='less')
+
+                if ttest[1] < self.alpha:
+                    scores_dict[k] = scores.mean()
+
+            if len(scores_dict) > 0:
+                max_el = max(scores_dict, key=scores_dict.get)
+
+                includes.add(max_el)
+                excludes.remove(max_el)
 
         self.selected_features_ = sorted(list(includes))
 
